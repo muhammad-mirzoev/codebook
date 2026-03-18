@@ -1,0 +1,362 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}CodeBook — Книги по программированию{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}CodeBook — лучшая библиотека книг по программированию{% endblock %}">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="base.css">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       NAVBAR
+  ============================================================ -->
+  <nav class="navbar">
+    <div class="navbar__inner">
+
+      <!-- Logo -->
+      <a href="{% url 'home' %}" class="navbar__logo">
+        <div class="navbar__logo-icon">📚</div>
+        Code<span>Book</span>
+      </a>
+
+      <!-- Search -->
+      <div class="navbar__search">
+        <input
+          type="text"
+          class="navbar__search-input"
+          id="navbarSearch"
+          placeholder="Поиск книг, авторов, языков..."
+          autocomplete="off"
+        >
+        <i class="fa-solid fa-magnifying-glass navbar__search-icon"></i>
+        <div class="navbar__search-results" id="searchResults"></div>
+      </div>
+
+      <!-- Nav links -->
+      <nav class="navbar__nav">
+        <a href="{% url 'home' %}" class="navbar__nav-link {% block nav_home %}{% endblock %}">
+          <i class="fa-solid fa-house"></i> Главная
+        </a>
+        <a href="{% url 'books_list' %}" class="navbar__nav-link {% block nav_books %}{% endblock %}">
+          <i class="fa-solid fa-book"></i> Книги
+        </a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'shelf' %}" class="navbar__nav-link {% block nav_shelf %}{% endblock %}">
+          <i class="fa-solid fa-bookmark"></i> Полка
+        </a>
+        {% endif %}
+      </nav>
+
+      <!-- Auth -->
+      {% if user.is_authenticated %}
+        <div class="navbar__user" id="userMenu">
+          <div class="navbar__user-btn" id="userMenuBtn">
+            <img src="{{ user.get_avatar }}" alt="{{ user.username }}" class="navbar__user-avatar">
+            <span class="navbar__user-name">{{ user.username }}</span>
+            <i class="fa-solid fa-chevron-down navbar__user-chevron"></i>
+          </div>
+          <div class="navbar__user-online"></div>
+          <div class="navbar__dropdown" id="userDropdown">
+            <div class="dropdown__header">
+              <div class="dropdown__username">{{ user.username }}</div>
+              {% if user.show_email %}
+                <div class="dropdown__email">{{ user.email }}</div>
+              {% endif %}
+            </div>
+            <a href="{% url 'profile' username=user.username %}" class="dropdown__item">
+              <i class="fa-solid fa-user"></i> Мой профиль
+            </a>
+            <a href="{% url 'shelf' %}" class="dropdown__item">
+              <i class="fa-solid fa-bookmark"></i> Моя полка
+            </a>
+            <a href="{% url 'profile_edit' %}" class="dropdown__item">
+              <i class="fa-solid fa-pen"></i> Редактировать профиль
+            </a>
+            <div class="dropdown__divider"></div>
+            <a href="{% url 'privacy_settings' %}" class="dropdown__item">
+              <i class="fa-solid fa-shield"></i> Настройки
+            </a>
+            <div class="dropdown__divider"></div>
+            <a href="{% url 'logout' %}" class="dropdown__item dropdown__item--danger">
+              <i class="fa-solid fa-right-from-bracket"></i> Выйти
+            </a>
+          </div>
+        </div>
+      {% else %}
+        <div class="navbar__auth">
+          <a href="{% url 'login' %}" class="btn-login">Войти</a>
+          <a href="{% url 'register' %}" class="btn-register">Регистрация</a>
+        </div>
+      {% endif %}
+
+      <!-- Burger -->
+      <button class="navbar__burger" id="burgerBtn" aria-label="Меню">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       CATEGORIES BAR
+  ============================================================ -->
+  <div class="categories-bar">
+    <div class="categories-bar__inner">
+      <a href="{% url 'books_list' %}" class="cat-link {% block cat_all %}{% endblock %}">
+        <span class="cat-link__icon">🔥</span> Все книги
+      </a>
+      <a href="{% url 'category' slug='python' %}" class="cat-link {% block cat_python %}{% endblock %}">
+        <span class="cat-link__icon">🐍</span> Python
+      </a>
+      <a href="{% url 'category' slug='javascript' %}" class="cat-link {% block cat_js %}{% endblock %}">
+        <span class="cat-link__icon">⚡</span> JavaScript
+      </a>
+      <a href="{% url 'category' slug='cpp' %}" class="cat-link {% block cat_cpp %}{% endblock %}">
+        <span class="cat-link__icon">⚙️</span> C++
+      </a>
+      <a href="{% url 'category' slug='rust' %}" class="cat-link {% block cat_rust %}{% endblock %}">
+        <span class="cat-link__icon">🦀</span> Rust
+      </a>
+      <a href="{% url 'category' slug='go' %}" class="cat-link {% block cat_go %}{% endblock %}">
+        <span class="cat-link__icon">🔵</span> Go
+      </a>
+      <a href="{% url 'category' slug='java' %}" class="cat-link {% block cat_java %}{% endblock %}">
+        <span class="cat-link__icon">☕</span> Java
+      </a>
+      <a href="{% url 'category' slug='typescript' %}" class="cat-link {% block cat_ts %}{% endblock %}">
+        <span class="cat-link__icon">🔷</span> TypeScript
+      </a>
+      <a href="{% url 'category' slug='csharp' %}" class="cat-link {% block cat_cs %}{% endblock %}">
+        <span class="cat-link__icon">🟣</span> C#
+      </a>
+      <a href="{% url 'category' slug='sql' %}" class="cat-link {% block cat_sql %}{% endblock %}">
+        <span class="cat-link__icon">🗄️</span> SQL
+      </a>
+      <a href="{% url 'category' slug='devops' %}" class="cat-link {% block cat_devops %}{% endblock %}">
+        <span class="cat-link__icon">🐳</span> DevOps
+      </a>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MESSAGES
+  ============================================================ -->
+  {% if messages %}
+  <div class="messages-wrapper" id="messagesWrapper">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" id="alert-{{ forloop.counter }}">
+      {% if message.tags == 'success' %}<i class="fa-solid fa-circle-check"></i>
+      {% elif message.tags == 'error' or message.tags == 'danger' %}<i class="fa-solid fa-circle-xmark"></i>
+      {% elif message.tags == 'warning' %}<i class="fa-solid fa-triangle-exclamation"></i>
+      {% else %}<i class="fa-solid fa-circle-info"></i>{% endif %}
+      {{ message }}
+      <button class="alert__close" onclick="this.parentElement.remove()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ============================================================
+       MOBILE MENU
+  ============================================================ -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu__search">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" placeholder="Поиск книг...">
+    </div>
+    <a href="{% url 'home' %}" class="mobile-menu__link"><i class="fa-solid fa-house"></i> Главная</a>
+    <a href="{% url 'books_list' %}" class="mobile-menu__link"><i class="fa-solid fa-book"></i> Книги</a>
+    {% if user.is_authenticated %}
+      <a href="{% url 'shelf' %}" class="mobile-menu__link"><i class="fa-solid fa-bookmark"></i> Полка</a>
+      <a href="{% url 'profile' username=user.username %}" class="mobile-menu__link"><i class="fa-solid fa-user"></i> Профиль</a>
+    {% endif %}
+    <div class="mobile-menu__divider"></div>
+    <div class="mobile-menu__divider" style="font-size:0.75rem;color:var(--text-muted);padding:4px 0">КАТЕГОРИИ</div>
+    <a href="{% url 'category' slug='python' %}" class="mobile-menu__link">🐍 Python</a>
+    <a href="{% url 'category' slug='javascript' %}" class="mobile-menu__link">⚡ JavaScript</a>
+    <a href="{% url 'category' slug='cpp' %}" class="mobile-menu__link">⚙️ C++</a>
+    <a href="{% url 'category' slug='rust' %}" class="mobile-menu__link">🦀 Rust</a>
+    <a href="{% url 'category' slug='go' %}" class="mobile-menu__link">🔵 Go</a>
+    <div class="mobile-menu__divider"></div>
+    {% if user.is_authenticated %}
+      <div class="mobile-menu__auth">
+        <a href="{% url 'logout' %}" class="btn btn-danger" style="width:100%;justify-content:center">
+          <i class="fa-solid fa-right-from-bracket"></i> Выйти
+        </a>
+      </div>
+    {% else %}
+      <div class="mobile-menu__auth">
+        <a href="{% url 'login' %}" class="btn btn-secondary" style="width:100%;justify-content:center">Войти</a>
+        <a href="{% url 'register' %}" class="btn btn-primary" style="width:100%;justify-content:center">Регистрация</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- ============================================================
+       КОНТЕНТ СТРАНИЦЫ
+  ============================================================ -->
+  <main class="page-wrapper">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <div class="footer__brand-logo">
+          <div class="footer__brand-logo-icon">📚</div>
+          CodeBook
+        </div>
+        <p class="footer__desc">Библиотека книг по программированию. Учись, читай, развивайся.</p>
+      </div>
+      <div>
+        <div class="footer__col-title">Каталог</div>
+        <div class="footer__links">
+          <a href="{% url 'books_list' %}" class="footer__link">Все книги</a>
+          <a href="{% url 'category' slug='python' %}" class="footer__link">Python</a>
+          <a href="{% url 'category' slug='javascript' %}" class="footer__link">JavaScript</a>
+          <a href="{% url 'category' slug='cpp' %}" class="footer__link">C++</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer__col-title">Аккаунт</div>
+        <div class="footer__links">
+          {% if user.is_authenticated %}
+            <a href="{% url 'profile' username=user.username %}" class="footer__link">Мой профиль</a>
+            <a href="{% url 'shelf' %}" class="footer__link">Моя полка</a>
+            <a href="{% url 'profile_edit' %}" class="footer__link">Настройки</a>
+          {% else %}
+            <a href="{% url 'register' %}" class="footer__link">Регистрация</a>
+            <a href="{% url 'login' %}" class="footer__link">Войти</a>
+          {% endif %}
+        </div>
+      </div>
+      <div>
+        <div class="footer__col-title">Прочее</div>
+        <div class="footer__links">
+          <a href="#" class="footer__link">О проекте</a>
+          <a href="#" class="footer__link">Контакты</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span class="footer__copy">© 2025 CodeBook. Все права защищены.</span>
+      <div class="footer__socials">
+        <a href="#" class="footer__social-btn" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        <a href="#" class="footer__social-btn" title="Telegram"><i class="fa-brands fa-telegram"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT
+  ============================================================ -->
+  <script>
+    // --- Dropdown меню пользователя ---
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdown = document.getElementById('userDropdown');
+
+    if (userMenuBtn && userDropdown) {
+      userMenuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        userMenuBtn.classList.toggle('open');
+        userDropdown.classList.toggle('open');
+      });
+      document.addEventListener('click', () => {
+        userMenuBtn.classList.remove('open');
+        userDropdown.classList.remove('open');
+      });
+    }
+
+    // --- Burger / mobile menu ---
+    const burgerBtn = document.getElementById('burgerBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    if (burgerBtn && mobileMenu) {
+      burgerBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('open');
+        document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+      });
+    }
+
+    // --- Автозакрытие алертов через 4 сек ---
+    document.querySelectorAll('.alert').forEach((alert, i) => {
+      setTimeout(() => {
+        alert.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateX(20px)';
+        setTimeout(() => alert.remove(), 400);
+      }, 4000 + i * 200);
+    });
+
+    // --- Live поиск ---
+    const searchInput = document.getElementById('navbarSearch');
+    const searchResults = document.getElementById('searchResults');
+    let searchTimer = null;
+
+    if (searchInput && searchResults) {
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimer);
+        const query = searchInput.value.trim();
+        if (query.length < 2) {
+          searchResults.classList.remove('active');
+          return;
+        }
+        searchTimer = setTimeout(() => {
+          fetch(`/books/search/?q=${encodeURIComponent(query)}&format=json`)
+            .then(r => r.json())
+            .then(data => {
+              if (data.results && data.results.length > 0) {
+                searchResults.innerHTML = data.results.map(book => `
+                  <a href="${book.url}" class="search-result-item">
+                    <img src="${book.cover}" alt="${book.title}">
+                    <div class="search-result-item__info">
+                      <div class="search-result-item__title">${book.title}</div>
+                      <div class="search-result-item__category">${book.category}</div>
+                    </div>
+                  </a>
+                `).join('');
+                searchResults.classList.add('active');
+              } else {
+                searchResults.innerHTML = `<div class="search-result-item"><div class="search-result-item__info"><div class="search-result-item__title" style="color:var(--text-muted)">Ничего не найдено</div></div></div>`;
+                searchResults.classList.add('active');
+              }
+            })
+            .catch(() => searchResults.classList.remove('active'));
+        }, 300);
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target)) {
+          searchResults.classList.remove('active');
+        }
+      });
+
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && searchInput.value.trim()) {
+          window.location.href = `/books/search/?q=${encodeURIComponent(searchInput.value.trim())}`;
+        }
+      });
+    }
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
