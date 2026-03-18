@@ -1,0 +1,684 @@
+{% extends 'base.html' %}
+
+{% block title %}Редактировать профиль — CodeBook{% endblock %}
+
+{% block extra_css %}
+<style>
+  .edit-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+  }
+
+  .edit-page__header {
+    margin-bottom: 32px;
+  }
+
+  .edit-page__title {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 800;
+  }
+
+  .edit-page__subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* Layout */
+  .edit-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* Sidebar nav */
+  .edit-sidebar {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    position: sticky;
+    top: calc(var(--navbar-h) + 44px + 20px);
+  }
+
+  .edit-sidebar__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 18px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    border-left: 2px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition);
+    text-decoration: none;
+  }
+
+  .edit-sidebar__item:hover {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+  }
+
+  .edit-sidebar__item.active {
+    color: var(--accent);
+    background: var(--accent-glow);
+    border-left-color: var(--accent);
+  }
+
+  .edit-sidebar__item i { width: 16px; text-align: center; }
+
+  /* Sections */
+  .edit-section {
+    display: none;
+  }
+
+  .edit-section.active { display: block; }
+
+  .edit-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .edit-card__header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .edit-card__title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .edit-card__body { padding: 24px; }
+
+  /* Avatar upload */
+  .avatar-upload {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .avatar-preview {
+    width: 90px; height: 90px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .avatar-upload__actions { display: flex; flex-direction: column; gap: 10px; }
+
+  .avatar-upload__actions p {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .file-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-active);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition);
+    width: fit-content;
+  }
+
+  .file-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--accent);
+  }
+
+  /* Cover upload */
+  .cover-preview {
+    width: 100%;
+    height: 120px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    border: 2px solid var(--border);
+    margin-bottom: 12px;
+    background: var(--bg-elevated);
+  }
+
+  /* Form fields */
+  .form-group { margin-bottom: 20px; }
+
+  .form-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 7px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .form-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: -4px;
+    margin-bottom: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    height: 46px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0 16px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+
+  .form-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .form-input::placeholder { color: var(--text-muted); }
+
+  textarea.form-input {
+    height: auto;
+    padding: 12px 16px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .form-error {
+    font-size: 0.78rem;
+    color: var(--danger);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* Input with icon prefix */
+  .input-prefix {
+    display: flex;
+    align-items: center;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+
+  .input-prefix:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .input-prefix__icon {
+    padding: 0 12px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    border-right: 1px solid var(--border);
+    height: 46px;
+    display: flex;
+    align-items: center;
+    background: var(--bg-surface);
+    white-space: nowrap;
+    font-size: 0.8rem;
+  }
+
+  .input-prefix input {
+    flex: 1;
+    height: 46px;
+    background: transparent;
+    border: none;
+    padding: 0 14px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    outline: none;
+  }
+
+  .input-prefix input::placeholder { color: var(--text-muted); }
+
+  /* Toggle */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .toggle-row:first-child { padding-top: 0; }
+
+  .toggle-row__info {}
+
+  .toggle-row__label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .toggle-row__desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .toggle input { opacity: 0; width: 0; height: 0; }
+
+  .toggle__slider {
+    position: absolute;
+    inset: 0;
+    background: var(--bg-hover);
+    border-radius: 100px;
+    border: 1px solid var(--border-active);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .toggle__slider::before {
+    content: '';
+    position: absolute;
+    left: 3px; top: 50%;
+    transform: translateY(-50%);
+    width: 16px; height: 16px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    transition: all 0.25s ease;
+  }
+
+  .toggle input:checked + .toggle__slider {
+    background: var(--accent-glow);
+    border-color: var(--accent);
+  }
+
+  .toggle input:checked + .toggle__slider::before {
+    left: calc(100% - 19px);
+    background: var(--accent);
+  }
+
+  /* Char counter */
+  .form-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 6px;
+  }
+
+  .char-count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  /* Save bar */
+  .save-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-top: 8px;
+  }
+
+  @media (max-width: 768px) {
+    .edit-layout { grid-template-columns: 1fr; }
+    .edit-sidebar { position: static; display: flex; overflow-x: auto; }
+    .edit-sidebar__item { white-space: nowrap; border-left: none; border-bottom: 2px solid transparent; }
+    .edit-sidebar__item.active { border-left: none; border-bottom-color: var(--accent); }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-page">
+
+  <div class="edit-page__header">
+    <h1 class="edit-page__title">Настройки профиля</h1>
+    <p class="edit-page__subtitle">Управляй своим аккаунтом и публичной информацией</p>
+  </div>
+
+  <div class="edit-layout">
+
+    <!-- Sidebar -->
+    <div class="edit-sidebar">
+      <a class="edit-sidebar__item active" data-section="avatar" href="#">
+        <i class="fa-solid fa-image"></i> Фото и баннер
+      </a>
+      <a class="edit-sidebar__item" data-section="info" href="#">
+        <i class="fa-solid fa-user"></i> Основная инфо
+      </a>
+      <a class="edit-sidebar__item" data-section="socials" href="#">
+        <i class="fa-solid fa-share-nodes"></i> Соцсети
+      </a>
+      <a class="edit-sidebar__item" data-section="privacy" href="#">
+        <i class="fa-solid fa-shield"></i> Приватность
+      </a>
+    </div>
+
+    <!-- Content -->
+    <div class="edit-content">
+
+      <!-- Avatar & Cover -->
+      <div class="edit-section active" id="section-avatar">
+        <!-- Avatar -->
+        <div class="edit-card">
+          <div class="edit-card__header">
+            <i class="fa-solid fa-user-circle" style="color:var(--accent)"></i>
+            <span class="edit-card__title">Фото профиля</span>
+          </div>
+          <div class="edit-card__body">
+            <div class="avatar-upload">
+              <img src="{{ request.user.get_avatar }}" alt="Аватар" class="avatar-preview" id="avatarPreview">
+              <div class="avatar-upload__actions">
+                <form method="POST" action="{% url 'avatar_upload' %}" enctype="multipart/form-data" id="avatarForm">
+                  {% csrf_token %}
+                  <label class="file-btn">
+                    <i class="fa-solid fa-upload"></i> Загрузить фото
+                    <input type="file" name="avatar" accept="image/*" style="display:none" onchange="previewImage(this, 'avatarPreview'); this.form.submit()">
+                  </label>
+                </form>
+                <p>JPG, PNG или GIF. Максимум 2 МБ.<br>Рекомендуемый размер: 400×400 px.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cover -->
+        <div class="edit-card">
+          <div class="edit-card__header">
+            <i class="fa-solid fa-panorama" style="color:var(--accent)"></i>
+            <span class="edit-card__title">Баннер профиля</span>
+          </div>
+          <div class="edit-card__body">
+            <img src="{{ request.user.get_cover }}" alt="Баннер" class="cover-preview" id="coverPreview">
+            <form method="POST" action="{% url 'cover_upload' %}" enctype="multipart/form-data" id="coverForm">
+              {% csrf_token %}
+              <label class="file-btn">
+                <i class="fa-solid fa-upload"></i> Загрузить баннер
+                <input type="file" name="cover" accept="image/*" style="display:none" onchange="previewImage(this, 'coverPreview'); this.form.submit()">
+              </label>
+            </form>
+            <p style="font-size:0.78rem;color:var(--text-muted);margin-top:10px">
+              Рекомендуемый размер: 1400×280 px. Максимум 5 МБ.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main info -->
+      <div class="edit-section" id="section-info">
+        <form method="POST" action="{% url 'profile_edit' %}">
+          {% csrf_token %}
+          <input type="hidden" name="section" value="info">
+
+          <div class="edit-card">
+            <div class="edit-card__header">
+              <i class="fa-solid fa-user" style="color:var(--accent)"></i>
+              <span class="edit-card__title">Основная информация</span>
+            </div>
+            <div class="edit-card__body">
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Имя пользователя</label>
+                  <input
+                    type="text"
+                    name="username"
+                    class="form-input {% if form.username.errors %}error{% endif %}"
+                    value="{{ form.username.value|default:request.user.username }}"
+                    placeholder="Ваш никнейм"
+                  >
+                  {% if form.username.errors %}
+                    <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form.username.errors.0 }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Местоположение</label>
+                  <input
+                    type="text"
+                    name="location"
+                    class="form-input"
+                    value="{{ form.location.value|default:request.user.location }}"
+                    placeholder="Город, Страна"
+                  >
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">О себе</label>
+                <textarea
+                  name="bio"
+                  class="form-input"
+                  rows="4"
+                  placeholder="Расскажи о себе, своих интересах в программировании..."
+                  maxlength="500"
+                  id="bioField"
+                >{{ form.bio.value|default:request.user.bio }}</textarea>
+                <div class="form-footer">
+                  <span class="char-count"><span id="bioCount">0</span>/500</span>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Дата рождения</label>
+                  <input
+                    type="date"
+                    name="date_of_birth"
+                    class="form-input"
+                    value="{{ form.date_of_birth.value|default:request.user.date_of_birth|date:'Y-m-d' }}"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Сайт</label>
+                  <input
+                    type="url"
+                    name="website"
+                    class="form-input"
+                    value="{{ form.website.value|default:request.user.website }}"
+                    placeholder="https://yoursite.com"
+                  >
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="save-bar">
+            <a href="{% url 'profile' username=request.user.username %}" class="btn btn-ghost">Отмена</a>
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-check"></i> Сохранить
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Socials -->
+      <div class="edit-section" id="section-socials">
+        <form method="POST" action="{% url 'profile_edit' %}">
+          {% csrf_token %}
+          <input type="hidden" name="section" value="socials">
+
+          <div class="edit-card">
+            <div class="edit-card__header">
+              <i class="fa-solid fa-share-nodes" style="color:var(--accent)"></i>
+              <span class="edit-card__title">Социальные сети</span>
+            </div>
+            <div class="edit-card__body">
+
+              <div class="form-group">
+                <label class="form-label">GitHub</label>
+                <div class="input-prefix">
+                  <span class="input-prefix__icon"><i class="fa-brands fa-github"></i> github.com/</span>
+                  <input
+                    type="text"
+                    name="github"
+                    value="{{ form.github.value|default:request.user.github }}"
+                    placeholder="username"
+                  >
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Telegram</label>
+                <div class="input-prefix">
+                  <span class="input-prefix__icon"><i class="fa-brands fa-telegram"></i> t.me/</span>
+                  <input
+                    type="text"
+                    name="telegram"
+                    value="{{ form.telegram.value|default:request.user.telegram }}"
+                    placeholder="username"
+                  >
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="save-bar">
+            <a href="{% url 'profile' username=request.user.username %}" class="btn btn-ghost">Отмена</a>
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-check"></i> Сохранить
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Privacy -->
+      <div class="edit-section" id="section-privacy">
+        <form method="POST" action="{% url 'privacy_settings' %}">
+          {% csrf_token %}
+
+          <div class="edit-card">
+            <div class="edit-card__header">
+              <i class="fa-solid fa-shield" style="color:var(--accent)"></i>
+              <span class="edit-card__title">Приватность</span>
+            </div>
+            <div class="edit-card__body">
+
+              <div class="toggle-row">
+                <div class="toggle-row__info">
+                  <div class="toggle-row__label">Публичный профиль</div>
+                  <div class="toggle-row__desc">Все смогут видеть твой профиль и список книг</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" name="is_profile_public" {% if request.user.is_profile_public %}checked{% endif %}>
+                  <span class="toggle__slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-row">
+                <div class="toggle-row__info">
+                  <div class="toggle-row__label">Показывать email</div>
+                  <div class="toggle-row__desc">Твой email будет виден в профиле</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" name="show_email" {% if request.user.show_email %}checked{% endif %}>
+                  <span class="toggle__slider"></span>
+                </label>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="save-bar">
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-check"></i> Сохранить настройки
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Sidebar navigation
+  const sidebarItems = document.querySelectorAll('.edit-sidebar__item');
+  const sections = document.querySelectorAll('.edit-section');
+
+  sidebarItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = item.dataset.section;
+
+      sidebarItems.forEach(i => i.classList.remove('active'));
+      sections.forEach(s => s.classList.remove('active'));
+
+      item.classList.add('active');
+      document.getElementById(`section-${target}`).classList.add('active');
+    });
+  });
+
+  // Восстановить активную секцию из URL hash
+  const hash = window.location.hash.replace('#', '');
+  if (hash) {
+    const targetItem = document.querySelector(`[data-section="${hash}"]`);
+    if (targetItem) targetItem.click();
+  }
+
+  // Bio char counter
+  const bioField = document.getElementById('bioField');
+  const bioCount = document.getElementById('bioCount');
+  if (bioField && bioCount) {
+    bioCount.textContent = bioField.value.length;
+    bioField.addEventListener('input', () => {
+      bioCount.textContent = bioField.value.length;
+    });
+  }
+
+  // Image preview
+  function previewImage(input, previewId) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById(previewId).src = e.target.result;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+</script>
+{% endblock %}

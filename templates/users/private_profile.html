@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Закрытый профиль — CodeBook{% endblock %}
+
+{% block extra_css %}
+<style>
+  .private-page {
+    min-height: calc(100vh - var(--navbar-h) - 44px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .private-page::before {
+    content: '';
+    position: absolute;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, #4f8ef715 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .private-card {
+    text-align: center;
+    max-width: 420px;
+    width: 100%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 48px 40px;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    z-index: 1;
+  }
+
+  .private-card__avatar {
+    width: 80px; height: 80px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    border: 3px solid var(--border-active);
+    margin: 0 auto 20px;
+    display: block;
+    filter: blur(4px);
+    opacity: 0.6;
+  }
+
+  .private-card__lock {
+    width: 56px; height: 56px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-active);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 1.4rem;
+    color: var(--text-muted);
+  }
+
+  .private-card__username {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .private-card__text {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  .private-card__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="private-page">
+  <div class="private-card">
+    <div class="private-card__lock">
+      <i class="fa-solid fa-lock"></i>
+    </div>
+
+    <div class="private-card__username">{{ profile_user.username }}</div>
+    <p class="private-card__text">
+      Этот профиль закрыт.<br>
+      Только владелец может видеть его содержимое.
+    </p>
+
+    <div class="private-card__actions">
+      <a href="{% url 'books_list' %}" class="btn btn-primary">
+        <i class="fa-solid fa-book"></i> Смотреть книги
+      </a>
+      <a href="/" class="btn btn-ghost">
+        <i class="fa-solid fa-house"></i> На главную
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
