@@ -408,7 +408,7 @@
             <div class="avatar-upload">
               <img src="{{ request.user.get_avatar }}" alt="Аватар" class="avatar-preview" id="avatarPreview">
               <div class="avatar-upload__actions">
-                <form method="POST" action="{% url 'avatar_upload' %}" enctype="multipart/form-data" id="avatarForm">
+                <form method="POST" action="{% url 'users:avatar_upload' %}" enctype="multipart/form-data" id="avatarForm">
                   {% csrf_token %}
                   <label class="file-btn">
                     <i class="fa-solid fa-upload"></i> Загрузить фото
@@ -429,7 +429,7 @@
           </div>
           <div class="edit-card__body">
             <img src="{{ request.user.get_cover }}" alt="Баннер" class="cover-preview" id="coverPreview">
-            <form method="POST" action="{% url 'cover_upload' %}" enctype="multipart/form-data" id="coverForm">
+            <form method="POST" action="{% url 'users:cover_upload' %}" enctype="multipart/form-data" id="coverForm">
               {% csrf_token %}
               <label class="file-btn">
                 <i class="fa-solid fa-upload"></i> Загрузить баннер
@@ -445,7 +445,7 @@
 
       <!-- Main info -->
       <div class="edit-section" id="section-info">
-        <form method="POST" action="{% url 'profile_edit' %}">
+        <form method="POST" action="{% url 'users:profile_edit' %}">
           {% csrf_token %}
           <input type="hidden" name="section" value="info">
 
@@ -510,13 +510,13 @@
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label">Сайт</label>
+                  <label class="form-label">Телеграм</label>
                   <input
                     type="url"
-                    name="website"
+                    name="telegram"
                     class="form-input"
-                    value="{{ form.website.value|default:request.user.website }}"
-                    placeholder="https://yoursite.com"
+                    value="{{ form.telegram.value|default:request.user.telegram }}"
+                    placeholder="https://your-tg.com"
                   >
                 </div>
               </div>
@@ -525,7 +525,7 @@
           </div>
 
           <div class="save-bar">
-            <a href="{% url 'profile' username=request.user.username %}" class="btn btn-ghost">Отмена</a>
+            <a href="{% url 'users:profile' username=request.user.username %}" class="btn btn-ghost">Отмена</a>
             <button type="submit" class="btn btn-primary">
               <i class="fa-solid fa-check"></i> Сохранить
             </button>
@@ -535,7 +535,7 @@
 
       <!-- Socials -->
       <div class="edit-section" id="section-socials">
-        <form method="POST" action="{% url 'profile_edit' %}">
+        <form method="POST" action="{% url 'users:profile_edit' %}">
           {% csrf_token %}
           <input type="hidden" name="section" value="socials">
 
@@ -545,19 +545,6 @@
               <span class="edit-card__title">Социальные сети</span>
             </div>
             <div class="edit-card__body">
-
-              <div class="form-group">
-                <label class="form-label">GitHub</label>
-                <div class="input-prefix">
-                  <span class="input-prefix__icon"><i class="fa-brands fa-github"></i> github.com/</span>
-                  <input
-                    type="text"
-                    name="github"
-                    value="{{ form.github.value|default:request.user.github }}"
-                    placeholder="username"
-                  >
-                </div>
-              </div>
 
               <div class="form-group">
                 <label class="form-label">Telegram</label>
@@ -576,7 +563,7 @@
           </div>
 
           <div class="save-bar">
-            <a href="{% url 'profile' username=request.user.username %}" class="btn btn-ghost">Отмена</a>
+            <a href="{% url 'users:profile' username=request.user.username %}" class="btn btn-ghost">Отмена</a>
             <button type="submit" class="btn btn-primary">
               <i class="fa-solid fa-check"></i> Сохранить
             </button>
@@ -586,7 +573,7 @@
 
       <!-- Privacy -->
       <div class="edit-section" id="section-privacy">
-        <form method="POST" action="{% url 'privacy_settings' %}">
+        <form method="POST" action="{% url 'users:privacy_settings' %}">
           {% csrf_token %}
 
           <div class="edit-card">
@@ -622,11 +609,26 @@
           </div>
 
           <div class="save-bar">
-            <button type="submit" class="btn btn-primary">
-              <i class="fa-solid fa-check"></i> Сохранить настройки
-            </button>
+
+            <!-- форма сохранения -->
+            <form method="POST" action="{% url 'users:privacy_settings' %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-check"></i> Сохранить настройки
+              </button>
+            </form>
+          
+            <!-- форма удаления -->
+            <form method="POST"
+                  action="{% url 'users:delete_account' %}"
+                  onsubmit="return confirm('Ты точно хочешь удалить аккаунт? Это действие нельзя отменить!');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger">
+                Удалить аккаунт
+              </button>
+            </form>
+          
           </div>
-        </form>
       </div>
 
     </div>

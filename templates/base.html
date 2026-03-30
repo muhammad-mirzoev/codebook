@@ -11,10 +11,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
 
   <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  {% block extra_css %}{% endblock %}
 </head>
 <body>
 
@@ -25,7 +26,7 @@
     <div class="navbar__inner">
 
       <!-- Logo -->
-      <a href="{% url 'home' %}" class="navbar__logo">
+      <a href="{% url 'books:home' %}" class="navbar__logo">
         <div class="navbar__logo-icon">📚</div>
         Code<span>Book</span>
       </a>
@@ -45,14 +46,14 @@
 
       <!-- Nav links -->
       <nav class="navbar__nav">
-        <a href="{% url 'home' %}" class="navbar__nav-link {% block nav_home %}{% endblock %}">
+        <a href="{% url 'books:home' %}" class="navbar__nav-link {% block nav_home %}{% endblock %}">
           <i class="fa-solid fa-house"></i> Главная
         </a>
-        <a href="{% url 'books_list' %}" class="navbar__nav-link {% block nav_books %}{% endblock %}">
+        <a href="{% url 'books:books_list' %}" class="navbar__nav-link {% block nav_books %}{% endblock %}">
           <i class="fa-solid fa-book"></i> Книги
         </a>
         {% if user.is_authenticated %}
-        <a href="{% url 'shelf' %}" class="navbar__nav-link {% block nav_shelf %}{% endblock %}">
+        <a href="" class="navbar__nav-link {% block nav_shelf %}{% endblock %}">
           <i class="fa-solid fa-bookmark"></i> Полка
         </a>
         {% endif %}
@@ -74,29 +75,26 @@
                 <div class="dropdown__email">{{ user.email }}</div>
               {% endif %}
             </div>
-            <a href="{% url 'profile' username=user.username %}" class="dropdown__item">
+            <a href="{% url 'users:profile' username=user.username %}" class="dropdown__item">
               <i class="fa-solid fa-user"></i> Мой профиль
             </a>
-            <a href="{% url 'shelf' %}" class="dropdown__item">
+            <a href="" class="dropdown__item">
               <i class="fa-solid fa-bookmark"></i> Моя полка
             </a>
-            <a href="{% url 'profile_edit' %}" class="dropdown__item">
-              <i class="fa-solid fa-pen"></i> Редактировать профиль
-            </a>
             <div class="dropdown__divider"></div>
-            <a href="{% url 'privacy_settings' %}" class="dropdown__item">
+            <a href="{% url 'users:profile_edit' %}" class="dropdown__item">
               <i class="fa-solid fa-shield"></i> Настройки
             </a>
             <div class="dropdown__divider"></div>
-            <a href="{% url 'logout' %}" class="dropdown__item dropdown__item--danger">
+            <a href="{% url 'users:logout' %}" class="dropdown__item dropdown__item--danger">
               <i class="fa-solid fa-right-from-bracket"></i> Выйти
             </a>
           </div>
         </div>
       {% else %}
         <div class="navbar__auth">
-          <a href="{% url 'login' %}" class="btn-login">Войти</a>
-          <a href="{% url 'register' %}" class="btn-register">Регистрация</a>
+          <a href="{% url 'users:login' %}" class="btn-login">Войти</a>
+          <a href="{% url 'users:register' %}" class="btn-register">Регистрация</a>
         </div>
       {% endif %}
 
@@ -115,37 +113,37 @@
   ============================================================ -->
   <div class="categories-bar">
     <div class="categories-bar__inner">
-      <a href="{% url 'books_list' %}" class="cat-link {% block cat_all %}{% endblock %}">
+      <a href="{% url 'books:books_list' %}" class="cat-link {% block cat_all %}{% endblock %}">
         <span class="cat-link__icon">🔥</span> Все книги
       </a>
-      <a href="{% url 'category' slug='python' %}" class="cat-link {% block cat_python %}{% endblock %}">
+      <a href="{% url 'books:category' slug='python' %}" class="cat-link {% block cat_python %}{% endblock %}">
         <span class="cat-link__icon">🐍</span> Python
       </a>
-      <a href="{% url 'category' slug='javascript' %}" class="cat-link {% block cat_js %}{% endblock %}">
+      <a href="{% url 'books:category' slug='javascript' %}" class="cat-link {% block cat_js %}{% endblock %}">
         <span class="cat-link__icon">⚡</span> JavaScript
       </a>
-      <a href="{% url 'category' slug='cpp' %}" class="cat-link {% block cat_cpp %}{% endblock %}">
+      <a href="{% url 'books:category' slug='cpp' %}" class="cat-link {% block cat_cpp %}{% endblock %}">
         <span class="cat-link__icon">⚙️</span> C++
       </a>
-      <a href="{% url 'category' slug='rust' %}" class="cat-link {% block cat_rust %}{% endblock %}">
+      <a href="{% url 'books:category' slug='rust' %}" class="cat-link {% block cat_rust %}{% endblock %}">
         <span class="cat-link__icon">🦀</span> Rust
       </a>
-      <a href="{% url 'category' slug='go' %}" class="cat-link {% block cat_go %}{% endblock %}">
+      <a href="{% url 'books:category' slug='go' %}" class="cat-link {% block cat_go %}{% endblock %}">
         <span class="cat-link__icon">🔵</span> Go
       </a>
-      <a href="{% url 'category' slug='java' %}" class="cat-link {% block cat_java %}{% endblock %}">
+      <a href="{% url 'books:category' slug='java' %}" class="cat-link {% block cat_java %}{% endblock %}">
         <span class="cat-link__icon">☕</span> Java
       </a>
-      <a href="{% url 'category' slug='typescript' %}" class="cat-link {% block cat_ts %}{% endblock %}">
+      <a href="{% url 'books:category' slug='typescript' %}" class="cat-link {% block cat_ts %}{% endblock %}">
         <span class="cat-link__icon">🔷</span> TypeScript
       </a>
-      <a href="{% url 'category' slug='csharp' %}" class="cat-link {% block cat_cs %}{% endblock %}">
+      <a href="{% url 'books:category' slug='csharp' %}" class="cat-link {% block cat_cs %}{% endblock %}">
         <span class="cat-link__icon">🟣</span> C#
       </a>
-      <a href="{% url 'category' slug='sql' %}" class="cat-link {% block cat_sql %}{% endblock %}">
+      <a href="{% url 'books:category' slug='sql' %}" class="cat-link {% block cat_sql %}{% endblock %}">
         <span class="cat-link__icon">🗄️</span> SQL
       </a>
-      <a href="{% url 'category' slug='devops' %}" class="cat-link {% block cat_devops %}{% endblock %}">
+      <a href="{% url 'books:category' slug='devops' %}" class="cat-link {% block cat_devops %}{% endblock %}">
         <span class="cat-link__icon">🐳</span> DevOps
       </a>
     </div>
@@ -179,30 +177,30 @@
       <i class="fa-solid fa-magnifying-glass"></i>
       <input type="text" placeholder="Поиск книг...">
     </div>
-    <a href="{% url 'home' %}" class="mobile-menu__link"><i class="fa-solid fa-house"></i> Главная</a>
-    <a href="{% url 'books_list' %}" class="mobile-menu__link"><i class="fa-solid fa-book"></i> Книги</a>
+    <a href="{% url 'books:home' %}" class="mobile-menu__link"><i class="fa-solid fa-house"></i> Главная</a>
+    <a href="{% url 'books:books_list' %}" class="mobile-menu__link"><i class="fa-solid fa-book"></i> Книги</a>
     {% if user.is_authenticated %}
-      <a href="{% url 'shelf' %}" class="mobile-menu__link"><i class="fa-solid fa-bookmark"></i> Полка</a>
-      <a href="{% url 'profile' username=user.username %}" class="mobile-menu__link"><i class="fa-solid fa-user"></i> Профиль</a>
+      <a href="" class="mobile-menu__link"><i class="fa-solid fa-bookmark"></i> Полка</a>
+      <a href="{% url 'users:profile' username=user.username %}" class="mobile-menu__link"><i class="fa-solid fa-user"></i> Профиль</a>
     {% endif %}
     <div class="mobile-menu__divider"></div>
     <div class="mobile-menu__divider" style="font-size:0.75rem;color:var(--text-muted);padding:4px 0">КАТЕГОРИИ</div>
-    <a href="{% url 'category' slug='python' %}" class="mobile-menu__link">🐍 Python</a>
-    <a href="{% url 'category' slug='javascript' %}" class="mobile-menu__link">⚡ JavaScript</a>
-    <a href="{% url 'category' slug='cpp' %}" class="mobile-menu__link">⚙️ C++</a>
-    <a href="{% url 'category' slug='rust' %}" class="mobile-menu__link">🦀 Rust</a>
-    <a href="{% url 'category' slug='go' %}" class="mobile-menu__link">🔵 Go</a>
+    <a href="{% url 'books:category' slug='python' %}" class="mobile-menu__link">🐍 Python</a>
+    <a href="{% url 'books:category' slug='javascript' %}" class="mobile-menu__link">⚡ JavaScript</a>
+    <a href="{% url 'books:category' slug='cpp' %}" class="mobile-menu__link">⚙️ C++</a>
+    <a href="{% url 'books:category' slug='rust' %}" class="mobile-menu__link">🦀 Rust</a>
+    <a href="{% url 'books:category' slug='go' %}" class="mobile-menu__link">🔵 Go</a>
     <div class="mobile-menu__divider"></div>
     {% if user.is_authenticated %}
       <div class="mobile-menu__auth">
-        <a href="{% url 'logout' %}" class="btn btn-danger" style="width:100%;justify-content:center">
+        <a href="{% url 'users:logout' %}" class="btn btn-danger" style="width:100%;justify-content:center">
           <i class="fa-solid fa-right-from-bracket"></i> Выйти
         </a>
       </div>
     {% else %}
       <div class="mobile-menu__auth">
-        <a href="{% url 'login' %}" class="btn btn-secondary" style="width:100%;justify-content:center">Войти</a>
-        <a href="{% url 'register' %}" class="btn btn-primary" style="width:100%;justify-content:center">Регистрация</a>
+        <a href="{% url 'users:login' %}" class="btn btn-secondary" style="width:100%;justify-content:center">Войти</a>
+        <a href="{% url 'users:register' %}" class="btn btn-primary" style="width:100%;justify-content:center">Регистрация</a>
       </div>
     {% endif %}
   </div>
@@ -224,27 +222,27 @@
           <div class="footer__brand-logo-icon">📚</div>
           CodeBook
         </div>
-        <p class="footer__desc">Библиотека книг по программированию. Учись, читай, развивайся.</p>
+        <p class="footer__desc">Сайт книг по программированию. Учись, читай, программируй.</p>
       </div>
       <div>
         <div class="footer__col-title">Каталог</div>
         <div class="footer__links">
-          <a href="{% url 'books_list' %}" class="footer__link">Все книги</a>
-          <a href="{% url 'category' slug='python' %}" class="footer__link">Python</a>
-          <a href="{% url 'category' slug='javascript' %}" class="footer__link">JavaScript</a>
-          <a href="{% url 'category' slug='cpp' %}" class="footer__link">C++</a>
+          <a href="{% url 'books:books_list' %}" class="footer__link">Все книги</a>
+          <a href="{% url 'books:category' slug='python' %}" class="footer__link">Python</a>
+          <a href="{% url 'books:category' slug='javascript' %}" class="footer__link">JavaScript</a>
+          <a href="{% url 'books:category' slug='cpp' %}" class="footer__link">C++</a>
         </div>
       </div>
       <div>
         <div class="footer__col-title">Аккаунт</div>
         <div class="footer__links">
           {% if user.is_authenticated %}
-            <a href="{% url 'profile' username=user.username %}" class="footer__link">Мой профиль</a>
-            <a href="{% url 'shelf' %}" class="footer__link">Моя полка</a>
-            <a href="{% url 'profile_edit' %}" class="footer__link">Настройки</a>
+            <a href="{% url 'users:profile' username=user.username %}" class="footer__link">Мой профиль</a>
+            <a href="" class="footer__link">Моя полка</a>
+            <a href="{% url 'users:profile_edit' %}" class="footer__link">Настройки</a>
           {% else %}
-            <a href="{% url 'register' %}" class="footer__link">Регистрация</a>
-            <a href="{% url 'login' %}" class="footer__link">Войти</a>
+            <a href="{% url 'users:register' %}" class="footer__link">Регистрация</a>
+            <a href="{% url 'users:login' %}" class="footer__link">Войти</a>
           {% endif %}
         </div>
       </div>
@@ -257,7 +255,7 @@
       </div>
     </div>
     <div class="footer__bottom">
-      <span class="footer__copy">© 2025 CodeBook. Все права защищены.</span>
+      <span class="footer__copy">© 2025 CodeBook</span>
       <div class="footer__socials">
         <a href="#" class="footer__social-btn" title="GitHub"><i class="fa-brands fa-github"></i></a>
         <a href="#" class="footer__social-btn" title="Telegram"><i class="fa-brands fa-telegram"></i></a>

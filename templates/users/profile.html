@@ -397,7 +397,7 @@
 
       {% if is_owner %}
         <div class="profile-header__actions">
-          <a href="{% url 'profile_edit' %}" class="btn btn-secondary">
+          <a href="{% url 'users:profile_edit' %}" class="btn btn-secondary">
             <i class="fa-solid fa-pen"></i> Редактировать
           </a>
         </div>
@@ -461,7 +461,7 @@
     {% if user_books %}
       <div class="books-grid">
         {% for ub in user_books %}
-          <a href="{% url 'book_detail' slug=ub.book.slug %}" class="book-card">
+          <a href="{% url 'books:book_detail' slug=ub.book.slug %}" class="book-card">
             <img src="{{ ub.book.get_cover }}" alt="{{ ub.book.title }}" class="book-card__cover">
             <div class="book-card__info">
               <div class="book-card__title">{{ ub.book.title }}</div>
@@ -494,7 +494,7 @@
           {% endif %}
         </p>
         {% if is_owner %}
-          <a href="{% url 'books_list' %}" class="btn btn-primary">
+          <a href="{% url 'books:books_list' %}" class="btn btn-primary">
             <i class="fa-solid fa-book"></i> Найти книги
           </a>
         {% endif %}
