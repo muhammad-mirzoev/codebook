@@ -1,0 +1,622 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ book.title }} — CodeBook{% endblock %}
+
+{% block extra_css %}
+<style>
+  .detail-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* Breadcrumb */
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb a {
+    color: var(--text-muted);
+    transition: color var(--transition);
+  }
+
+  .breadcrumb a:hover { color: var(--accent); }
+  .breadcrumb i { font-size: 0.65rem; }
+
+  /* Layout */
+  .detail-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+
+  /* Left - Cover */
+  .detail-cover-col {
+    position: sticky;
+    top: calc(var(--navbar-h) + 44px + 20px);
+  }
+
+  .detail-cover {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    background: var(--bg-elevated);
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  /* Action buttons */
+  .detail-actions { display: flex; flex-direction: column; gap: 10px; }
+
+  .action-btn {
+    width: 100%;
+    height: 46px;
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    cursor: pointer;
+    border: none;
+    transition: all var(--transition);
+    text-decoration: none;
+  }
+
+  .action-btn--primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 14px var(--accent-glow);
+  }
+
+  .action-btn--primary:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 4px 20px var(--accent-glow);
+    transform: translateY(-1px);
+  }
+
+  .action-btn--secondary {
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-active);
+  }
+
+  .action-btn--secondary:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--accent);
+  }
+
+  .action-btn--reading {
+    background: var(--accent-glow);
+    color: var(--accent);
+    border: 1px solid #4f8ef730;
+  }
+
+  .action-btn--saved {
+    background: #1a1a0d;
+    color: var(--warning);
+    border: 1px solid #fbbf2430;
+  }
+
+  .action-btn--finished {
+    background: #0d2a1e;
+    color: var(--success);
+    border: 1px solid #34d39930;
+  }
+
+  /* Stats under cover */
+  .cover-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .cover-stat {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    text-align: center;
+  }
+
+  .cover-stat__num {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+
+  .cover-stat__label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* Right - Info */
+  .detail-info {}
+
+  .detail-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .detail-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  .detail-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .detail-author__photo {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--bg-elevated);
+    border: 2px solid var(--border);
+  }
+
+  .detail-author__info {}
+
+  .detail-author__name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .detail-author__label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  /* Meta pills */
+  .detail-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  .meta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+  }
+
+  .meta-pill i { color: var(--accent); font-size: 0.8rem; }
+
+  /* Description */
+  .detail-desc-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .detail-desc-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .detail-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin-bottom: 32px;
+  }
+
+  /* Book details table */
+  .detail-table {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+
+  .detail-table__row {
+    display: flex;
+    align-items: center;
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border);
+    gap: 16px;
+  }
+
+  .detail-table__row:last-child { border-bottom: none; }
+
+  .detail-table__key {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    min-width: 130px;
+    flex-shrink: 0;
+  }
+
+  .detail-table__val {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+  }
+
+  /* ============================================================
+     RELATED BOOKS
+  ============================================================ */
+  .related-section {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+    border-top: 1px solid var(--border);
+    padding-top: 48px;
+  }
+
+  .related-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .related-title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 18px;
+  }
+
+  .book-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    display: block;
+  }
+
+  .book-card:hover {
+    border-color: var(--border-active);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .book-card__cover {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    background: var(--bg-elevated);
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .book-card:hover .book-card__cover { transform: scale(1.03); }
+
+  .book-card__body { padding: 10px 12px 12px; }
+
+  .book-card__category {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+
+  .book-card__title {
+    font-size: 0.83rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text-primary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (max-width: 900px) {
+    .detail-layout { grid-template-columns: 1fr; }
+    .detail-cover-col { position: static; display: flex; gap: 20px; align-items: flex-start; }
+    .detail-cover { width: 160px; flex-shrink: 0; }
+    .detail-actions { flex-direction: row; flex-wrap: wrap; }
+    .action-btn { flex: 1; min-width: 140px; }
+  }
+
+  @media (max-width: 600px) {
+    .detail-cover-col { flex-direction: column; }
+    .detail-cover { width: 100%; max-width: 220px; }
+    .detail-page { padding: 24px 16px 60px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="{% url 'books:home' %}">Главная</a>
+    <i class="fa-solid fa-chevron-right"></i>
+    <a href="{% url 'books:books_list' %}">Книги</a>
+    {% if book.category %}
+      <i class="fa-solid fa-chevron-right"></i>
+      <a href="{{ book.category.get_absolute_url }}">{{ book.category.name }}</a>
+    {% endif %}
+    <i class="fa-solid fa-chevron-right"></i>
+    <span style="color:var(--text-secondary)">{{ book.title|truncatechars:40 }}</span>
+  </div>
+
+  <div class="detail-layout">
+
+    <!-- Cover col -->
+    <div class="detail-cover-col">
+      <img src="{{ book.get_cover }}" alt="{{ book.title }}" class="detail-cover">
+
+      <!-- Actions -->
+      <div class="detail-actions">
+        {% if book.file_url %}
+          <a href="{{ book.file_url }}" target="_blank" class="action-btn action-btn--primary">
+            <i class="fa-solid fa-book-open"></i> Читать книгу
+          </a>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+          {% if user_book_status == 'reading' %}
+            <button class="action-btn action-btn--reading" onclick="updateStatus('{{ book.slug }}', 'reading')">
+              <i class="fa-solid fa-book-open"></i> Читаю
+            </button>
+          {% elif user_book_status == 'saved' %}
+            <button class="action-btn action-btn--saved" onclick="updateStatus('{{ book.slug }}', 'saved')">
+              <i class="fa-solid fa-bookmark"></i> Сохранено
+            </button>
+          {% elif user_book_status == 'finished' %}
+            <button class="action-btn action-btn--finished" onclick="updateStatus('{{ book.slug }}', 'finished')">
+              <i class="fa-solid fa-check"></i> Прочитано
+            </button>
+          {% else %}
+            <button class="action-btn action-btn--secondary" id="addBtn" onclick="showStatusMenu()">
+              <i class="fa-solid fa-plus"></i> Добавить в полку
+            </button>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'users:login' %}?next={{ request.path }}" class="action-btn action-btn--secondary">
+            <i class="fa-solid fa-bookmark"></i> Войди чтобы сохранить
+          </a>
+        {% endif %}
+      </div>
+
+      <!-- Status dropdown (hidden by default) -->
+      {% if user.is_authenticated and not user_book_status %}
+      <div id="statusMenu" style="display:none;margin-top:10px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden">
+        <button onclick="setStatus('{{ book.slug }}', 'reading')" style="width:100%;padding:11px 16px;background:none;border:none;border-bottom:1px solid var(--border);color:var(--accent);font-size:0.875rem;font-weight:600;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px">
+          <i class="fa-solid fa-book-open"></i> Читаю
+        </button>
+        <button onclick="setStatus('{{ book.slug }}', 'saved')" style="width:100%;padding:11px 16px;background:none;border:none;border-bottom:1px solid var(--border);color:var(--warning);font-size:0.875rem;font-weight:600;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px">
+          <i class="fa-solid fa-bookmark"></i> Сохранить
+        </button>
+        <button onclick="setStatus('{{ book.slug }}', 'finished')" style="width:100%;padding:11px 16px;background:none;border:none;color:var(--success);font-size:0.875rem;font-weight:600;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px">
+          <i class="fa-solid fa-check"></i> Прочитано
+        </button>
+      </div>
+      {% endif %}
+
+      <!-- Stats -->
+      <div class="cover-stats">
+        <div class="cover-stat">
+          <div class="cover-stat__num">{{ book.views_count }}</div>
+          <div class="cover-stat__label">Просмотров</div>
+        </div>
+        <div class="cover-stat">
+          <div class="cover-stat__num">{{ book.saves_count }}</div>
+          <div class="cover-stat__label">Сохранений</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info col -->
+    <div class="detail-info">
+
+      <!-- Badges -->
+      <div class="detail-badges">
+        {% if book.category %}
+          <a href="{{ book.category.get_absolute_url }}" class="badge badge-accent">
+            {{ book.category.icon }} {{ book.category.name }}
+          </a>
+        {% endif %}
+        {% if book.is_new %}
+          <span class="badge badge-success">Новинка</span>
+        {% endif %}
+        <span class="badge badge-muted">{{ book.get_level_display_icon }} {{ book.get_level_display }}</span>
+        <span class="badge badge-muted">
+          {% if book.language == 'ru' %}🇷🇺{% else %}🇬🇧{% endif %}
+          {{ book.get_language_display }}
+        </span>
+      </div>
+
+      <!-- Title -->
+      <h1 class="detail-title">{{ book.title }}</h1>
+
+      <!-- Author -->
+      {% if book.author %}
+      <div class="detail-author">
+        <img src="{{ book.author.get_photo }}" alt="{{ book.author.name }}" class="detail-author__photo">
+        <div class="detail-author__info">
+          <div class="detail-author__name">{{ book.author.name }}</div>
+          <div class="detail-author__label">Автор</div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Meta pills -->
+      <div class="detail-meta">
+        {% if book.pages %}
+          <div class="meta-pill">
+            <i class="fa-solid fa-file-lines"></i> {{ book.pages }} страниц
+          </div>
+        {% endif %}
+        {% if book.published_year %}
+          <div class="meta-pill">
+            <i class="fa-solid fa-calendar"></i> {{ book.published_year }} год
+          </div>
+        {% endif %}
+        {% if book.isbn %}
+          <div class="meta-pill">
+            <i class="fa-solid fa-barcode"></i> ISBN: {{ book.isbn }}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Description -->
+      <div class="detail-desc-title">О книге</div>
+      <div class="detail-desc">{{ book.description|linebreaks }}</div>
+
+      <!-- Details table -->
+      <div class="detail-table">
+        {% if book.category %}
+        <div class="detail-table__row">
+          <div class="detail-table__key">Категория</div>
+          <div class="detail-table__val">{{ book.category.icon }} {{ book.category.name }}</div>
+        </div>
+        {% endif %}
+        <div class="detail-table__row">
+          <div class="detail-table__key">Уровень</div>
+          <div class="detail-table__val">{{ book.get_level_display_icon }} {{ book.get_level_display }}</div>
+        </div>
+        <div class="detail-table__row">
+          <div class="detail-table__key">Язык</div>
+          <div class="detail-table__val">
+            {% if book.language == 'ru' %}🇷🇺 Русский{% else %}🇬🇧 English{% endif %}
+          </div>
+        </div>
+        {% if book.pages %}
+        <div class="detail-table__row">
+          <div class="detail-table__key">Страниц</div>
+          <div class="detail-table__val">{{ book.pages }}</div>
+        </div>
+        {% endif %}
+        {% if book.published_year %}
+        <div class="detail-table__row">
+          <div class="detail-table__key">Год издания</div>
+          <div class="detail-table__val">{{ book.published_year }}</div>
+        </div>
+        {% endif %}
+        {% if book.isbn %}
+        <div class="detail-table__row">
+          <div class="detail-table__key">ISBN</div>
+          <div class="detail-table__val">{{ book.isbn }}</div>
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Related books -->
+{% if related_books %}
+<div class="related-section">
+  <div class="related-head">
+    <div class="related-title">
+      <span>📚</span> Похожие книги
+    </div>
+    {% if book.category %}
+      <a href="{{ book.category.get_absolute_url }}" class="section__link" style="font-size:0.85rem;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:6px">
+        Все в категории <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    {% endif %}
+  </div>
+  <div class="related-grid">
+    {% for rel in related_books %}
+      <a href="{{ rel.get_absolute_url }}" class="book-card">
+        <img src="{{ rel.get_cover }}" alt="{{ rel.title }}" class="book-card__cover">
+        <div class="book-card__body">
+          {% if rel.category %}
+            <div class="book-card__category">{{ rel.category.icon }} {{ rel.category.name }}</div>
+          {% endif %}
+          <div class="book-card__title">{{ rel.title }}</div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function showStatusMenu() {
+    const menu = document.getElementById('statusMenu');
+    if (menu) {
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+  }
+
+  function setStatus(slug, status) {
+    fetch(`/library/add/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}',
+      },
+      body: JSON.stringify({ book_slug: slug, status: status })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        window.location.reload();
+      }
+    });
+  }
+
+  function updateStatus(slug, currentStatus) {
+    // При клике на уже установленный статус — показываем меню смены
+    const menu = document.getElementById('statusMenu');
+    if (menu) {
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+  }
+</script>
+{% endblock %}

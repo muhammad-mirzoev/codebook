@@ -1,0 +1,326 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ category.name }} — CodeBook{% endblock %}
+
+{% block extra_css %}
+<style>
+  .cat-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+  }
+
+  /* Hero banner */
+  .cat-hero {
+    background: linear-gradient(135deg, #0d1a2a, #1a1330);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 40px 40px;
+    margin-bottom: 36px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .cat-hero::before {
+    content: '';
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, {{ category.color }}18 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cat-hero__icon {
+    font-size: 4rem;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cat-hero__info { position: relative; z-index: 1; }
+
+  .cat-hero__title {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .cat-hero__desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 500px;
+    margin-bottom: 14px;
+  }
+
+  .cat-hero__count {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    background: var(--accent-glow);
+    border: 1px solid #4f8ef730;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  /* Head */
+  .cat-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .cat-head__info {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .cat-head__info span {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .sort-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sort-select label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .sort-select select {
+    height: 36px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0 12px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color var(--transition);
+  }
+
+  .sort-select select:focus { border-color: var(--accent); }
+
+  /* Books grid */
+  .books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 20px;
+  }
+
+  .book-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    display: block;
+  }
+
+  .book-card:hover {
+    border-color: var(--border-active);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .book-card__cover-wrap { position: relative; overflow: hidden; }
+
+  .book-card__cover {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    background: var(--bg-elevated);
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .book-card:hover .book-card__cover { transform: scale(1.04); }
+
+  .book-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, #000000cc 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: flex-end;
+    padding: 12px;
+  }
+
+  .book-card:hover .book-card__overlay { opacity: 1; }
+
+  .book-card__overlay-btn {
+    width: 100%;
+    padding: 8px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .book-card__badges {
+    position: absolute;
+    top: 8px; left: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .book-badge {
+    display: inline-flex;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    backdrop-filter: blur(8px);
+  }
+
+  .book-badge--new { background: #4f8ef7cc; color: #fff; }
+
+  .book-card__body { padding: 11px 13px 13px; }
+
+  .book-card__title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text-primary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 7px;
+  }
+
+  .book-card__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .book-card__author {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 110px;
+  }
+
+  .book-card__level { font-size: 0.72rem; color: var(--text-muted); }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    grid-column: 1 / -1;
+  }
+
+  .empty-state__icon { font-size: 3.5rem; margin-bottom: 16px; opacity: 0.3; }
+
+  .empty-state__title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .empty-state__text {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 768px) {
+    .cat-page { padding: 20px 16px 40px; }
+    .cat-hero { padding: 28px 24px; }
+    .cat-hero__title { font-size: 1.4rem; }
+    .books-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cat-page">
+
+  <!-- Category hero -->
+  <div class="cat-hero">
+    <div class="cat-hero__icon">{{ category.icon }}</div>
+    <div class="cat-hero__info">
+      <h1 class="cat-hero__title">{{ category.name }}</h1>
+      {% if category.description %}
+        <p class="cat-hero__desc">{{ category.description }}</p>
+      {% endif %}
+      <div class="cat-hero__count">
+        <i class="fa-solid fa-book"></i> {{ books|length }} книг в категории
+      </div>
+    </div>
+  </div>
+
+  <!-- Head -->
+  <div class="cat-head">
+    <div class="cat-head__info">
+      Найдено: <span>{{ books|length }}</span> книг
+    </div>
+    <div class="sort-select">
+      <label>Сортировка:</label>
+      <select onchange="window.location.href=this.value">
+        <option value="{% url 'books:category' slug=category.slug %}?sort=-created_at" {% if selected_sort == '-created_at' %}selected{% endif %}>Сначала новые</option>
+        <option value="{% url 'books:category' slug=category.slug %}?sort=-views_count" {% if selected_sort == '-views_count' %}selected{% endif %}>По популярности</option>
+        <option value="{% url 'books:category' slug=category.slug %}?sort=title" {% if selected_sort == 'title' %}selected{% endif %}>По названию</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="books-grid">
+    {% for book in books %}
+      <a href="{{ book.get_absolute_url }}" class="book-card">
+        <div class="book-card__cover-wrap">
+          <img src="{{ book.get_cover }}" alt="{{ book.title }}" class="book-card__cover">
+          <div class="book-card__badges">
+            {% if book.is_new %}<span class="book-badge book-badge--new">Новинка</span>{% endif %}
+          </div>
+          <div class="book-card__overlay">
+            <div class="book-card__overlay-btn">Подробнее</div>
+          </div>
+        </div>
+        <div class="book-card__body">
+          <div class="book-card__title">{{ book.title }}</div>
+          <div class="book-card__meta">
+            <span class="book-card__author">{{ book.author.name|default:"—" }}</span>
+            <span class="book-card__level">{{ book.get_level_display_icon }}</span>
+          </div>
+        </div>
+      </a>
+    {% empty %}
+      <div class="empty-state">
+        <div class="empty-state__icon">📭</div>
+        <div class="empty-state__title">Книг пока нет</div>
+        <p class="empty-state__text">В этой категории ещё нет книг</p>
+        <a href="{% url 'books:books_list' %}" class="btn btn-primary">Все книги</a>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
