@@ -1,0 +1,728 @@
+{% extends 'base.html' %}
+
+{% block title %}CodeBook — Библиотека книг по программированию{% endblock %}
+{% block nav_home %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+
+  /* ============================================================
+     HERO
+  ============================================================ */
+  .hero {
+    position: relative;
+    padding: 80px 0 100px;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px; left: 50%;
+    transform: translateX(-60%);
+    width: 900px; height: 700px;
+    background: radial-gradient(ellipse, #4f8ef718 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+  }
+
+  .hero__inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+
+  .hero__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--accent-glow);
+    border: 1px solid #4f8ef730;
+    border-radius: 100px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .hero__title {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 4vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+  }
+
+  .hero__title span {
+    background: linear-gradient(135deg, var(--accent), #7b61ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero__desc {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    line-height: 1.75;
+    margin-bottom: 36px;
+    max-width: 480px;
+  }
+
+  .hero__actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .hero__stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 48px;
+    flex-wrap: wrap;
+  }
+
+  .hero__stat {}
+
+  .hero__stat-num {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+
+  .hero__stat-label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Hero visual */
+  .hero__visual {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .hero__books-stack {
+    position: relative;
+    width: 320px;
+    height: 380px;
+  }
+
+  .hero__book-card {
+    position: absolute;
+    width: 160px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    transition: transform 0.4s ease;
+  }
+
+  .hero__book-card img {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    display: block;
+    background: var(--bg-elevated);
+  }
+
+  .hero__book-card:nth-child(1) {
+    top: 0; left: 20px;
+    transform: rotate(-6deg);
+    z-index: 1;
+  }
+
+  .hero__book-card:nth-child(2) {
+    top: 40px; left: 100px;
+    transform: rotate(3deg);
+    z-index: 2;
+  }
+
+  .hero__book-card:nth-child(3) {
+    top: 80px; left: 50px;
+    transform: rotate(-2deg);
+    z-index: 3;
+  }
+
+  .hero__visual:hover .hero__book-card:nth-child(1) { transform: rotate(-10deg) translateY(-10px); }
+  .hero__visual:hover .hero__book-card:nth-child(2) { transform: rotate(6deg) translateX(10px); }
+  .hero__visual:hover .hero__book-card:nth-child(3) { transform: rotate(-1deg) translateY(6px); }
+
+  /* ============================================================
+     SECTIONS
+  ============================================================ */
+  .section {
+    padding: 60px 0;
+  }
+
+  .section + .section {
+    border-top: 1px solid var(--border);
+  }
+
+  .section__inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .section__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .section__title {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section__title-icon {
+    font-size: 1.2rem;
+  }
+
+  .section__link {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: gap var(--transition), color var(--transition);
+  }
+
+  .section__link:hover {
+    color: var(--accent-hover);
+    gap: 10px;
+  }
+
+  /* ============================================================
+     BOOK CARDS
+  ============================================================ */
+  .books-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+  }
+
+  .book-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: all 0.25s ease;
+    position: relative;
+    text-decoration: none;
+    display: block;
+  }
+
+  .book-card:hover {
+    border-color: var(--border-active);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .book-card__cover-wrap {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .book-card__cover {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    background: var(--bg-elevated);
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .book-card:hover .book-card__cover {
+    transform: scale(1.04);
+  }
+
+  .book-card__badges {
+    position: absolute;
+    top: 8px; left: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .book-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    backdrop-filter: blur(8px);
+  }
+
+  .book-badge--new      { background: #4f8ef7cc; color: #fff; }
+  .book-badge--featured { background: #fbbf24cc; color: #000; }
+
+  .book-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, #000000cc 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: flex-end;
+    padding: 14px;
+  }
+
+  .book-card:hover .book-card__overlay { opacity: 1; }
+
+  .book-card__overlay-btn {
+    width: 100%;
+    padding: 9px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-align: center;
+    font-family: var(--font-display);
+    transition: background var(--transition);
+  }
+
+  .book-card__overlay-btn:hover { background: var(--accent-hover); }
+
+  .book-card__body {
+    padding: 12px 14px 14px;
+  }
+
+  .book-card__category {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 5px;
+  }
+
+  .book-card__title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text-primary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .book-card__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .book-card__author {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+  }
+
+  .book-card__level {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+
+  /* ============================================================
+     CATEGORIES GRID
+  ============================================================ */
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
+  }
+
+  .cat-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 20px 16px;
+    text-align: center;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+  }
+
+  .cat-card:hover {
+    border-color: var(--border-active);
+    background: var(--bg-elevated);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .cat-card__icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .cat-card__name {
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .cat-card__count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  /* ============================================================
+     BANNER
+  ============================================================ */
+  .banner {
+    background: linear-gradient(135deg, #0d1a2a 0%, #1a1330 100%);
+    border: 1px solid #4f8ef720;
+    border-radius: var(--radius-xl);
+    padding: 48px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .banner::before {
+    content: '';
+    position: absolute;
+    right: -80px; top: -80px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, #4f8ef725 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .banner__content { position: relative; z-index: 1; }
+
+  .banner__title {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+
+  .banner__text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    max-width: 460px;
+    line-height: 1.7;
+  }
+
+  .banner__actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+  }
+
+  /* ============================================================
+     RESPONSIVE
+  ============================================================ */
+  @media (max-width: 1200px) {
+    .books-row { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  @media (max-width: 1024px) {
+    .hero__inner { grid-template-columns: 1fr; gap: 40px; }
+    .hero__visual { display: none; }
+    .books-row { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  @media (max-width: 768px) {
+    .hero { padding: 48px 0 60px; }
+    .books-row { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .banner { padding: 32px 24px; }
+    .banner__title { font-size: 1.2rem; }
+  }
+
+  @media (max-width: 480px) {
+    .books-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .hero__stats { gap: 20px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+  <!-- ============================================================
+       HERO
+  ============================================================ -->
+  <section class="hero">
+    <div class="hero__inner">
+      <div class="hero__text">
+        <div class="hero__label">
+          <i class="fa-solid fa-bolt"></i>
+          Библиотека для разработчиков
+        </div>
+        <h1 class="hero__title">
+          Читай. Учись.<br>
+          <span>Программируй.</span>
+        </h1>
+        <p class="hero__desc">
+          Лучшие книги по Python, JavaScript, Rust, Go и другим языкам программирования - в одном месте.
+        </p>
+        <div class="hero__actions">
+          <a href="{% url 'books:books_list' %}" class="btn btn-primary" style="padding:12px 28px;font-size:0.95rem">
+            <i class="fa-solid fa-book-open"></i> Смотреть книги
+          </a>
+          {% if not user.is_authenticated %}
+            <a href="{% url 'users:register' %}" class="btn btn-secondary" style="padding:12px 28px;font-size:0.95rem">
+              Регистрация
+            </a>
+          {% endif %}
+        </div>
+        <div class="hero__stats">
+          <div class="hero__stat">
+            <div class="hero__stat-num">{{ total_books }}+</div>
+            <div class="hero__stat-label">Книг</div>
+          </div>
+          <div class="hero__stat">
+            <div class="hero__stat-num">{{ total_categories }}+</div>
+            <div class="hero__stat-label">Языков</div>
+          </div>
+          <div class="hero__stat">
+            <div class="hero__stat-num">{{ total_users }}+</div>
+            <div class="hero__stat-label">Читателей</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Стопка книг -->
+      {% if featured_books %}
+      <div class="hero__visual">
+        <div class="hero__books-stack">
+          {% for book in featured_books|slice:":3" %}
+            <div class="hero__book-card">
+              <img src="{{ book.get_cover }}" alt="{{ book.title }}">
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FEATURED BOOKS
+  ============================================================ -->
+  {% if featured_books %}
+  <section class="section">
+    <div class="section__inner">
+      <div class="section__head">
+        <h2 class="section__title">
+          <span class="section__title-icon">⭐</span> Рекомендуемые
+        </h2>
+        <a href="{% url 'books:books_list' %}" class="section__link">
+          Все книги <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="books-row">
+        {% for book in featured_books %}
+          <a href="{{ book.get_absolute_url }}" class="book-card">
+            <div class="book-card__cover-wrap">
+              <img src="{{ book.get_cover }}" alt="{{ book.title }}" class="book-card__cover">
+              <div class="book-card__badges">
+                {% if book.is_new %}<span class="book-badge book-badge--new">Новинка</span>{% endif %}
+                {% if book.is_featured %}<span class="book-badge book-badge--featured">⭐ Топ</span>{% endif %}
+              </div>
+              <div class="book-card__overlay">
+                <div class="book-card__overlay-btn">Подробнее</div>
+              </div>
+            </div>
+            <div class="book-card__body">
+              {% if book.category %}
+                <div class="book-card__category">{{ book.category.icon }} {{ book.category.name }}</div>
+              {% endif %}
+              <div class="book-card__title">{{ book.title }}</div>
+              <div class="book-card__meta">
+                <span class="book-card__author">{{ book.author.name|default:"—" }}</span>
+                <span class="book-card__level">{{ book.get_level_display_icon }}</span>
+              </div>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ============================================================
+       CATEGORIES
+  ============================================================ -->
+  {% if categories %}
+  <section class="section">
+    <div class="section__inner">
+      <div class="section__head">
+        <h2 class="section__title">
+          <span class="section__title-icon">📂</span> Категории
+        </h2>
+      </div>
+      <div class="categories-grid">
+        {% for cat in categories %}
+          <a href="{{ cat.get_absolute_url }}" class="cat-card">
+            <span class="cat-card__icon">{{ cat.icon }}</span>
+            <div class="cat-card__name">{{ cat.name }}</div>
+            <div class="cat-card__count">{{ cat.books.count }} книг</div>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ============================================================
+       NEW BOOKS
+  ============================================================ -->
+  {% if new_books %}
+  <section class="section">
+    <div class="section__inner">
+      <div class="section__head">
+        <h2 class="section__title">
+          <span class="section__title-icon">🆕</span> Новинки
+        </h2>
+        <a href="{% url 'books:books_list' %}?sort=-created_at" class="section__link">
+          Все новинки <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="books-row">
+        {% for book in new_books %}
+          <a href="{{ book.get_absolute_url }}" class="book-card">
+            <div class="book-card__cover-wrap">
+              <img src="{{ book.get_cover }}" alt="{{ book.title }}" class="book-card__cover">
+              <div class="book-card__badges">
+                <span class="book-badge book-badge--new">Новинка</span>
+              </div>
+              <div class="book-card__overlay">
+                <div class="book-card__overlay-btn">Подробнее</div>
+              </div>
+            </div>
+            <div class="book-card__body">
+              {% if book.category %}
+                <div class="book-card__category">{{ book.category.icon }} {{ book.category.name }}</div>
+              {% endif %}
+              <div class="book-card__title">{{ book.title }}</div>
+              <div class="book-card__meta">
+                <span class="book-card__author">{{ book.author.name|default:"—" }}</span>
+                <span class="book-card__level">{{ book.get_level_display_icon }}</span>
+              </div>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ============================================================
+       POPULAR BOOKS
+  ============================================================ -->
+  {% if popular_books %}
+  <section class="section">
+    <div class="section__inner">
+      <div class="section__head">
+        <h2 class="section__title">
+          <span class="section__title-icon">🔥</span> Популярные
+        </h2>
+        <a href="{% url 'books:books_list' %}?sort=-views_count" class="section__link">
+          Смотреть все <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="books-row">
+        {% for book in popular_books %}
+          <a href="{{ book.get_absolute_url }}" class="book-card">
+            <div class="book-card__cover-wrap">
+              <img src="{{ book.get_cover }}" alt="{{ book.title }}" class="book-card__cover">
+              <div class="book-card__overlay">
+                <div class="book-card__overlay-btn">Подробнее</div>
+              </div>
+            </div>
+            <div class="book-card__body">
+              {% if book.category %}
+                <div class="book-card__category">{{ book.category.icon }} {{ book.category.name }}</div>
+              {% endif %}
+              <div class="book-card__title">{{ book.title }}</div>
+              <div class="book-card__meta">
+                <span class="book-card__author">{{ book.author.name|default:"—" }}</span>
+                <span class="book-card__level">{{ book.get_level_display_icon }}</span>
+              </div>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ============================================================
+       BANNER — CTA
+  ============================================================ -->
+  {% if not user.is_authenticated %}
+  <section class="section">
+    <div class="section__inner">
+      <div class="banner">
+        <div class="banner__content">
+          <div class="banner__title">📚 Начни читать прямо сейчас</div>
+          <p class="banner__text">
+            Зарегистрируйся бесплатно и получи доступ ко всей библиотеке. Сохраняй книги, отслеживай прогресс чтения.
+          </p>
+        </div>
+        <div class="banner__actions">
+          <a href="{% url 'users:register' %}" class="btn btn-primary" style="padding:13px 30px">
+            Создать аккаунт
+          </a>
+          <a href="{% url 'users:login' %}" class="btn btn-secondary" style="padding:13px 30px">
+            Войти
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+{% endblock %}
