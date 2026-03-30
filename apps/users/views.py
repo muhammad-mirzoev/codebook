@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.views.decorators.http import require_POST
 from django.utils import timezone
 from .models import CustomUser
 from .forms import (
@@ -13,7 +14,7 @@ from .forms import (
 # --- Регистрация ---
 def register_view(request):
     if request.user.is_authenticated:
-        return redirect('home')
+        return redirect('books:home')
 
     form = RegisterForm(request.POST or None)
     if request.method == 'POST':
@@ -21,7 +22,7 @@ def register_view(request):
             user = form.save()
             login(request, user)
             messages.success(request, f'Добро пожаловать, {user.username}! 🎉')
-            return redirect('home')
+            return redirect('books:home')
         else:
             messages.error(request, 'Проверьте правильность введённых данных.')
 
@@ -31,7 +32,7 @@ def register_view(request):
 # --- Логин ---
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('home')
+        return redirect('books:home')
 
     form = LoginForm(request, data=request.POST or None)
     if request.method == 'POST':
@@ -44,8 +45,8 @@ def login_view(request):
                 user.last_seen = timezone.now()
                 user.save(update_fields=['last_seen'])
                 messages.success(request, f'Привет, {user.username}! 👋')
-                next_url = request.GET.get('next', 'home')
-                return redirect(next_url)
+                next_url = request.GET.get('next')
+                return redirect(next_url or 'books:home')
         else:
             messages.error(request, 'Неверный email или пароль.')
 
@@ -57,7 +58,7 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     messages.info(request, 'Вы вышли из аккаунта.')
-    return redirect('login')
+    return redirect('users:login')
 
 
 # --- Профиль (чужой или свой) ---
@@ -84,7 +85,7 @@ def profile_edit_view(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Профиль обновлён! ✅')
-            return redirect('profile', username=request.user.username)
+            return redirect('users:profile', username=request.user.username)
         else:
             messages.error(request, 'Ошибка при сохранении.')
 
@@ -101,7 +102,7 @@ def avatar_upload_view(request):
             messages.success(request, 'Аватар обновлён! ✅')
         else:
             messages.error(request, 'Ошибка загрузки аватара.')
-    return redirect('profile_edit')
+    return redirect('users:profile_edit')
 
 
 # --- Смена баннера ---
@@ -114,7 +115,7 @@ def cover_upload_view(request):
             messages.success(request, 'Баннер обновлён! ✅')
         else:
             messages.error(request, 'Ошибка загрузки баннера.')
-    return redirect('profile_edit')
+    return redirect('users:profile_edit')
 
 
 # --- Настройки приватности ---
@@ -125,6 +126,16 @@ def privacy_settings_view(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Настройки сохранены! ✅')
-            return redirect('privacy_settings')
+            return redirect('users:privacy_settings')
+    return redirect('users:profile_edit')
 
-    return render(request, 'users/privacy_settings.html', {'form': form})
+
+# --- Удаление аккаунта ---
+@login_required
+@require_POST
+def delete_account_view(request):
+    user = request.user
+    logout(request)  # сначала разлогиниваем
+    user.delete()    # удаляем пользователя
+    messages.success(request, 'Ваш аккаунт успешно удалён.')
+    return redirect('books:home')
